@@ -90,7 +90,55 @@ def detect_pattern_in_text(doc):
             if not question_exists(questions_mapped, new_question):
                 questions_mapped.append(new_question)
 
+    # go through questions_mapped and look for gaps in page numbers, if the gap is 1-3, then insert question to array
+    questions_mapped = find_question_cont(questions_mapped, doc)
+
     return questions_mapped
+
+
+def find_question_cont(questions, doc):
+
+    gaps = True
+    # REMOVE THE WHILE LOOP TO TEMPORARILY FIX CODE
+    while gaps:
+        breaks = 0
+        question_append = []
+        for i in range(len(questions) - 2):
+            breaks = 0
+            curr = questions[i]
+            # print(curr.question_number)
+            next = questions[i + 1]
+            # print(next.question_number)
+            if (next.page_number - curr.page_number <= 4 and next.page_number - curr.page_number > 1):
+                # print(curr.question_number + ': continuation detected')
+                page = doc[curr.page_number]
+                default_width = page.rect.width
+                default_height = page.rect.height
+                new_question = QuestionClass(
+                    curr.page_number + 1, curr.question_number, 0, 0, default_width, default_height)
+                question_append.append(new_question)
+
+        for question_to_append in question_append:
+            qn = question_to_append.question_number
+            print(len(questions))
+            for question in questions:
+                # print(question)
+                if question.question_number == qn:
+                    index = questions.index(question)
+                    questions.insert(index, question_to_append)
+                    breaks = breaks + 1
+                    break
+
+        if (breaks == 0):
+            gaps = False
+
+        for question in question_append:
+            print(question.question_number)
+            print(question.page_number)
+
+    # print(len(questions))
+
+    return questions
 
 
 def capture_screenshots(pdf_file, exam_name):
@@ -126,7 +174,7 @@ def int_question_number(question_number):
 
 # This function assumes the questions array passed in is in order
 def set_lower_bounds(questions):
-    for i in range(len(questions) - 1):
+    for i in range(len(questions) - 2):
         curr = questions[i]
         next = questions[i + 1]
         # if curr and next exist on same page
