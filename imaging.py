@@ -154,8 +154,6 @@ if __name__ == "__main__":
     capture_screenshots(pdf_file, exam_name)
 
 
-# TODO: modify the find patterns function to also return the index of these matches on each page.
-# take screenshot - we can CROP question to fit the dimensions, we cna determine the dimensions by getting where the question starts, and where the next queston is (index).
-# must consider cases: if question ends on the page
-# if question continues to the next page
-# Update pattern regex to exclude expressions with a hyphen between them
+# TODO: FIGURE OUT HOW TO DETECT PAGES OF QUESTION CONTINUATION
+# EXCLUDE QUESTIONS 1-4 RANGES IN DETECTION
+# MULTIPLE CHOICE SECTION DETECTION - RECOGNISE NUMBERS ON LEFT HAND SIDE? RECOGNISE BOLD FONTS?
