@@ -99,10 +99,6 @@ def capture_screenshots(pdf_file, exam_name):
     # print(doc[11].get_text())
     questions_mapped = detect_pattern_in_text(doc)
     set_lower_bounds(questions_mapped)
-    # for question in questions_mapped:
-    #     print(question.question_number)
-    #     print(question.page_number)
-    #     print(question.y0)
 
     # Open PDF again to capture screenshots
     doc = fitz.open(pdf_file)
