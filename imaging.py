@@ -138,8 +138,7 @@ def crop_image(page, question, image):
     page_width = page.rect.width
     page_height = page.rect.height
 
-    x1, y1 = int(question.x0), int(
-        question.y0)  # Top-left corner
+    x1, y1 = int(question.x0), int(question.y0)  # Top-left corner
     x2, y2 = int(question.x1), int(question.y1)  # Bottom-right corner
     cropped_image = image[y1:y2, x1:x2]
 
