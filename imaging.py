@@ -4,8 +4,9 @@ import numpy as np
 import re
 import os
 
-
 # navigating through the dictionary structure of page to obtain x0, y0 of text
+
+
 def getHeight(pattern, page):
     data = page.get_text("dict")
     for block in data['blocks']:
@@ -13,12 +14,11 @@ def getHeight(pattern, page):
             for span in line['spans']:
                 if re.match(pattern, span['text']) != None:
                     bbox = span['bbox']
-                    # if 'Question 24' in span['text']:
-                    #     print(bbox)
+
                     # returns x and y position of element from top of page
                     return [bbox[0], bbox[1]]
 
-    # this return statmenet case is not accounted for - since the pages put in are assumed to contain question...
+    # if the return bbox = [0,0] then the pattern has not been detected and should therefore be rejected
     return [0, 0]
 
 
@@ -79,21 +79,14 @@ def detect_pattern_in_text(doc):
         matches = re.finditer(pattern, page_text, re.IGNORECASE)
         for match in matches:
             question = match.group(0)
-            # ADD FILTER HERE, if QUESTION is not in the form of Question x, REJECT (continue)
-
-            # if 'Question' in question:
-            # print(question, "is accessed")
-            # print(re.match(pattern, question))
             # Setting pattern to look for specific to question number
-            questionNumberPattern = r'\b' + \
+            question_number_pattern = r'\b' + \
                 re.escape(question) + r'\b(?![\w-]*-)'
-            x0y0 = getHeight(questionNumberPattern, doc[page_number])
-            # if 'Please' in question:
-            #     print(x0y0)
+            x0y0 = getHeight(question_number_pattern, doc[page_number])
             # set threshold of x where after x, any "question" detected is seen as invalid
             x_threshold = 200
-            # if detected pattern is to the right of accepted margin OR not in the questionNumberPattern
-            if (x0y0[0] > x_threshold or x0y0 == [0, 0]):
+            # if detected pattern is to the right of accepted margin OR not in the question_number_pattern
+            if x0y0[0] > x_threshold or x0y0 == [0, 0]:
                 continue
             new_question = QuestionClass(
                 page_number, question, x0y0[0], x0y0[1], default_width, default_height)
@@ -139,9 +132,8 @@ def find_question_cont(questions, doc):
                 breaks = breaks + 1
                 break
 
-        # if (breaks == 0):
-        #     gaps = False
-
+    if (breaks == 0):
+        print('No question gaps were found')
         # for question in question_append:
         #     print(question.question_number)
         #     print(question.page_number)
@@ -181,10 +173,12 @@ def capture_screenshots(pdf_file, exam_name):
 
 
 def int_question_number(question_number):
-    # print(question_number)
-
-    parts = question_number.split()
-    return int(parts[-1])
+    if 'Question' in question_number or 'question' in question_number:
+        parts = question_number.split()
+        return int(parts[-1])
+    # if 0 is returned then error as occured
+    print(f"An error occured while converting {question_number} to integer")
+    return 0
 
 
 # This function assumes the questions array passed in is in order
@@ -201,7 +195,7 @@ def crop_image(page, question, image):
     page_width = page.rect.width
     page_height = page.rect.height
 
-    x1, y1 = int(question.x0), int(question.y0)  # Top-left corner
+    x1, y1 = int(question.x0) - 5, int(question.y0)  # Top-left corner
     x2, y2 = int(question.x1), int(question.y1)  # Bottom-right corner
     cropped_image = image[y1:y2, x1:x2]
 
@@ -216,11 +210,11 @@ if __name__ == "__main__":
     # exam_name = "chemistry-hsc-exam-2010"
     # exam_name = "2020-hsc-biology"
     exam_name = "2022-hsc-biology"
+    # exam_name = "2018 Project Academy"
     exam_folder = './exam_papers'
     pdf_file = f"{exam_folder}/{exam_name}.pdf"
     capture_screenshots(pdf_file, exam_name)
 
 
 # TODO: FIGURE OUT HOW TO DETECT PAGES OF QUESTION CONTINUATION
-# EXCLUDE QUESTIONS 1-4 RANGES IN DETECTION
 # MULTIPLE CHOICE SECTION DETECTION - RECOGNISE NUMBERS ON LEFT HAND SIDE? RECOGNISE BOLD FONTS?
