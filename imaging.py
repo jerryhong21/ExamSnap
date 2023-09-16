@@ -98,10 +98,13 @@ def detect_pattern_in_text(doc):
 
     return questions_mapped
 
+# Function to find question continuation - this occurs in papers where continuations of questions on the next page is not explicitly labled
+# e.g. instead of the hsc format: Question 26 (continued), some papers do not label and carry straight on from the previous page
+
 
 def find_question_cont(questions, doc):
 
-    gaps = True
+    # gaps = True
     # REMOVE THE WHILE LOOP TO TEMPORARILY FIX CODE
     # while gaps:
     breaks = 0
@@ -113,7 +116,7 @@ def find_question_cont(questions, doc):
         next = questions[i + 1]
         # print(next.question_number)
         if (next.page_number - curr.page_number <= 4 and next.page_number - curr.page_number > 1):
-            # print(curr.question_number + ': continuation detected')
+            print(curr.question_number + ': continuation detected')
             page = doc[curr.page_number]
             default_width = page.rect.width
             default_height = page.rect.height
