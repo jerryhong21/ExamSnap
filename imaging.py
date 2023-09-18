@@ -6,12 +6,23 @@ import os
 
 # navigating through the dictionary structure of page to obtain x0, y0 of text
 
+# TODO: ADD ERROR CHECKS UNDER EVERY FOR LOOP, if a particular piece of text does not have a certain attribute, CONTINUE!
+
 
 def getHeight(pattern, page):
+    breaks = False
     data = page.get_text("dict")
     for block in data['blocks']:
+        if 'lines' not in block:
+            continue
         for line in block['lines']:
+            if 'spnas' not in line:
+                continue
+            # if 'spans' is not attribute:
+            #   continue
             for span in line['spans']:
+                if 'text' not in span:
+                    continue
                 if re.match(pattern, span['text']) != None:
                     bbox = span['bbox']
 
@@ -52,22 +63,21 @@ def question_exists(question_arr, new_question):
     return False
 
 
-def detect_pattern_in_text(doc):
+def find_mc_questions(doc, questions_mapped):
+    # set regex pattern to detect multiple choice questions
+
+    return questions_mapped
+
+
+def find_written_questions(doc, questions_mapped):
 
     # Regular expression to match "Question" followed by one or more spaces and one or more digits
-    # pattern = r"Question\s+\d+(?:(?!continued).)*"
-    # pattern = r"Question\s+\d+(?![\s\S]*continue)[\s\S]*"
-
     # Pattern below excludes:
     # 'continue' following a question, this indicates a mere sentence saying question continues...
     # Any hyphens in expression - indicates a question range, not an actual question
     # [NOT WORKING RIGHT NOW - IMPLEMENT LATER]
     # pattern = r"Question\s+\d+\s*(?![\r\n-]*continue)[\r\n\S]*"
-
     pattern = r"Question\s+\d+(?![\r\n]*continue)[\r\n\S]*"
-
-    pages_with_pattern = []
-    questions_mapped = []
 
     for page_number, page in enumerate(doc):
         # Page size in points (width, height)
@@ -83,6 +93,9 @@ def detect_pattern_in_text(doc):
             question_number_pattern = r'\b' + \
                 re.escape(question) + r'\b(?![\w-]*-)'
             x0y0 = getHeight(question_number_pattern, doc[page_number])
+            print(question)
+            if 'Question 24' in question:
+                print(x0y0)
             # set threshold of x where after x, any "question" detected is seen as invalid
             x_threshold = 200
             # if detected pattern is to the right of accepted margin OR not in the question_number_pattern
@@ -100,6 +113,8 @@ def detect_pattern_in_text(doc):
 
 # Function to find question continuation - this occurs in papers where continuations of questions on the next page is not explicitly labled
 # e.g. instead of the hsc format: Question 26 (continued), some papers do not label and carry straight on from the previous page
+
+# TODO: Check if we are accounting for continuation of the last question
 
 
 def find_question_cont(questions, doc):
@@ -141,33 +156,37 @@ def find_question_cont(questions, doc):
         #     print(question.question_number)
         #     print(question.page_number)
 
-    # print(len(questions))
-
     return questions
 
 
-def capture_screenshots(pdf_file, exam_name):
-    text = extract_text_from_pdf(pdf_file)
-    doc = fitz.open(pdf_file)
-    # print(doc[11].get_text())
-    questions_mapped = detect_pattern_in_text(doc)
-    # for question in questions_mapped:
-    #     print(question.question_number)
-    #     print(question.page_number)
+# Finds all questions on the pdf doc returns array containing all questions
+def find_all_questions(doc):
+    questions_mapped = []
+    # questions_mapped = find_mc_questions(doc, questions_mapped)
+    questions_mapped = find_written_questions(doc, questions_mapped)
 
+    return questions_mapped
+
+
+def capture_screenshots(pdf_file, exam_name):
+    doc = fitz.open(pdf_file)
+
+    questions_mapped = find_all_questions(doc)
     set_lower_bounds(questions_mapped)
 
-    # Open PDF again to capture screenshots
-    doc = fitz.open(pdf_file)
-
+    # loop through all questions in question array and capture screenshots
     for question in questions_mapped:
         page_number = question.page_number
         page = doc[page_number]
         pix = page.get_pixmap()
+
+        # capture screenshot in a pix array
         screenshot = np.frombuffer(
             pix.samples, dtype=np.uint8).reshape(pix.h, pix.w, pix.n)
         png_file = f"{exam_name}_{question.question_number}_Page{question.page_number}.png"
-        cv2.imwrite(png_file, screenshot)  # saving file
+
+        # saving screenshot file
+        cv2.imwrite(png_file, screenshot)
 
         # cropping file to contain singular question
         image = cv2.imread(png_file)
@@ -175,10 +194,12 @@ def capture_screenshots(pdf_file, exam_name):
         cv2.imwrite(png_file, cropped_image)
 
 
+# extracts question number integer (e.g. int_question_number('Question 24') = 24)
 def int_question_number(question_number):
     if 'Question' in question_number or 'question' in question_number:
         parts = question_number.split()
         return int(parts[-1])
+
     # if 0 is returned then error as occured
     print(f"An error occured while converting {question_number} to integer")
     return 0
@@ -194,6 +215,7 @@ def set_lower_bounds(questions):
             curr.y1 = next.y0
 
 
+# sets crops all question images to end at lower bounds
 def crop_image(page, question, image):
     page_width = page.rect.width
     page_height = page.rect.height
@@ -205,19 +227,14 @@ def crop_image(page, question, image):
     return cropped_image
 
 
+# main function
 if __name__ == "__main__":
-    # pdf_file = "2018_Final_Exam.pdf"  # Replace with the path to your PDF file
-    # Replace with the path to your PDF file
-    # exam_name = "Sydney Boys 2020 Physics Prelim Yearly & Solutions"
-    # exam_name = "2018_Final_Exam"
-    # exam_name = "chemistry-hsc-exam-2010"
-    # exam_name = "2020-hsc-biology"
-    exam_name = "2022-hsc-biology"
-    # exam_name = "2018 Project Academy"
+    # Replace with the name of exam pdf
+    exam_name = "James Ruse 2020 Physics Prelim Yearly & Solutions"
     exam_folder = './exam_papers'
     pdf_file = f"{exam_folder}/{exam_name}.pdf"
     capture_screenshots(pdf_file, exam_name)
 
 
-# TODO: FIGURE OUT HOW TO DETECT PAGES OF QUESTION CONTINUATION
-# MULTIPLE CHOICE SECTION DETECTION - RECOGNISE NUMBERS ON LEFT HAND SIDE? RECOGNISE BOLD FONTS?
+# TODO: MULTIPLE CHOICE SECTION DETECTION - RECOGNISE NUMBERS ON LEFT HAND SIDE? RECOGNISE BOLD FONTS?
+# TODO: (getHeight function) ADD ERROR CHECKS UNDER EVERY FOR LOOP, if a particular piece of text does not have a certain attribute, CONTINUE!
