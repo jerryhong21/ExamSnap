@@ -16,7 +16,7 @@ def getHeight(pattern, page):
         if 'lines' not in block:
             continue
         for line in block['lines']:
-            if 'spnas' not in line:
+            if 'spans' not in line:
                 continue
             # if 'spans' is not attribute:
             #   continue
@@ -25,7 +25,6 @@ def getHeight(pattern, page):
                     continue
                 if re.match(pattern, span['text']) != None:
                     bbox = span['bbox']
-
                     # returns x and y position of element from top of page
                     return [bbox[0], bbox[1]]
 
@@ -65,7 +64,9 @@ def question_exists(question_arr, new_question):
 
 def find_mc_questions(doc, questions_mapped):
     # set regex pattern to detect multiple choice questions
-
+    # can set a binary pattern? detect 1, 2, 3 within x margin
+    # OR detect Question 1, Question 2... within x + c margin
+    # set margin from sample spaces
     return questions_mapped
 
 
@@ -89,13 +90,11 @@ def find_written_questions(doc, questions_mapped):
         matches = re.finditer(pattern, page_text, re.IGNORECASE)
         for match in matches:
             question = match.group(0)
+            print(question)
             # Setting pattern to look for specific to question number
             question_number_pattern = r'\b' + \
                 re.escape(question) + r'\b(?![\w-]*-)'
             x0y0 = getHeight(question_number_pattern, doc[page_number])
-            print(question)
-            if 'Question 24' in question:
-                print(x0y0)
             # set threshold of x where after x, any "question" detected is seen as invalid
             x_threshold = 200
             # if detected pattern is to the right of accepted margin OR not in the question_number_pattern
@@ -170,8 +169,12 @@ def find_all_questions(doc):
 
 def capture_screenshots(pdf_file, exam_name):
     doc = fitz.open(pdf_file)
+    print(pdf_file)
 
     questions_mapped = find_all_questions(doc)
+    print(questions_mapped)
+    # perhaps we need to first SORT questions into order, in case the algorithm has detected a question before another
+    # search for sorting algoritms in python
     set_lower_bounds(questions_mapped)
 
     # loop through all questions in question array and capture screenshots
@@ -183,7 +186,11 @@ def capture_screenshots(pdf_file, exam_name):
         # capture screenshot in a pix array
         screenshot = np.frombuffer(
             pix.samples, dtype=np.uint8).reshape(pix.h, pix.w, pix.n)
-        png_file = f"{exam_name}_{question.question_number}_Page{question.page_number}.png"
+        # PNG file that goes to a folder named after exam
+        folder_name = 'exam_images'
+        png_file = f"./{folder_name}/{exam_name}_{question.question_number}_Page{question.page_number}.png"
+        # print(png_file)
+        # png_file = f"{exam_name}_{question.question_number}_Page{question.page_number}.png"
 
         # saving screenshot file
         cv2.imwrite(png_file, screenshot)
@@ -192,6 +199,7 @@ def capture_screenshots(pdf_file, exam_name):
         image = cv2.imread(png_file)
         cropped_image = crop_image(page, question, image)
         cv2.imwrite(png_file, cropped_image)
+        # print(f'File written to directory: {png_file}')
 
 
 # extracts question number integer (e.g. int_question_number('Question 24') = 24)
@@ -210,7 +218,9 @@ def set_lower_bounds(questions):
     for i in range(len(questions) - 2):
         curr = questions[i]
         next = questions[i + 1]
-        # if curr and next exist on same page
+        # if curr and next exist on same page)
+        # print(curr.question_number)
+        # print(next.question_number)
         if int_question_number(curr.question_number) - int_question_number(next.question_number) == -1 and curr.page_number == next.page_number:
             curr.y1 = next.y0
 
@@ -230,10 +240,18 @@ def crop_image(page, question, image):
 # main function
 if __name__ == "__main__":
     # Replace with the name of exam pdf
-    exam_name = "James Ruse 2020 Physics Prelim Yearly & Solutions"
+    exam_name = "2018 Project Academy"
+    exam_names = [
+        "Carlingford Preliminary Physics (2019) Yearly Examination", "2018 Project Academy", "2019_TEC"]
     exam_folder = './exam_papers'
     pdf_file = f"{exam_folder}/{exam_name}.pdf"
     capture_screenshots(pdf_file, exam_name)
+
+    # for exam in exam_names:
+    #     pdf_file = f"{exam_folder}/{exam}.pdf"
+    #     # print(pdf_file)
+    #     capture_screenshots(pdf_file, exam)
+    #     # print(f'Screenshots captured for {exam}')
 
 
 # TODO: MULTIPLE CHOICE SECTION DETECTION - RECOGNISE NUMBERS ON LEFT HAND SIDE? RECOGNISE BOLD FONTS?
