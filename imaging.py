@@ -5,7 +5,6 @@ import re
 import os
 
 # navigating through the dictionary structure of page to obtain x0, y0 of text
-
 # TODO: ADD ERROR CHECKS UNDER EVERY FOR LOOP, if a particular piece of text does not have a certain attribute, CONTINUE!
 
 
@@ -18,8 +17,6 @@ def getHeight(pattern, page):
         for line in block['lines']:
             if 'spans' not in line:
                 continue
-            # if 'spans' is not attribute:
-            #   continue
             for span in line['spans']:
                 if 'text' not in span:
                     continue
@@ -242,7 +239,9 @@ if __name__ == "__main__":
     # Replace with the name of exam pdf
     exam_name = "2018 Project Academy"
     exam_names = [
-        "Carlingford Preliminary Physics (2019) Yearly Examination", "2018 Project Academy", "2019_TEC"]
+        "Carlingford Preliminary Physics (2019) Yearly Examination",
+        "2018 Project Academy",
+        "2019_TEC"]
     exam_folder = './exam_papers'
     pdf_file = f"{exam_folder}/{exam_name}.pdf"
     capture_screenshots(pdf_file, exam_name)
@@ -253,6 +252,4 @@ if __name__ == "__main__":
     #     capture_screenshots(pdf_file, exam)
     #     # print(f'Screenshots captured for {exam}')
 
-
 # TODO: MULTIPLE CHOICE SECTION DETECTION - RECOGNISE NUMBERS ON LEFT HAND SIDE? RECOGNISE BOLD FONTS?
-# TODO: (getHeight function) ADD ERROR CHECKS UNDER EVERY FOR LOOP, if a particular piece of text does not have a certain attribute, CONTINUE!
