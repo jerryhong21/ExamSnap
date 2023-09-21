@@ -1,7 +1,12 @@
 import fitz  # PyMuPDF
 import json
 import re
-# Function to add a red circle annotation
+import glob
+
+files = glob.glob("./exam_papers/*.pdf")
+for file in files:
+    print(file)
+    
 
 
 def add_circle(page, x, y, radius):
