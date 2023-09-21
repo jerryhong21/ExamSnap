@@ -20,6 +20,8 @@ def capture_screenshots(pdf_file, exam_name):
 
     # loop through all questions in question array and capture screenshots
     for question in questions_mapped:
+        if question.x0 == 0 and question.y0 == 0:
+            continue
         page_number = question.page_number
         page = doc[page_number]
         pix = page.get_pixmap()
@@ -75,30 +77,49 @@ def crop_image(page, question, image):
 
     x1, y1 = int(question.x0) - 5, int(question.y0)  # Top-left corner
     x2, y2 = int(question.x1), int(question.y1)  # Bottom-right corner
+    
     cropped_image = image[y1:y2, x1:x2]
-
+    # if question.question_number == 20:
+    #     print(x1)
+    #     print(y1)
+    #     print(x2)
+    #     print(y2)
+    #     print(question.page_number)
     return cropped_image
+
+
+def clean_questions(questions):
+    # Iterate in reverse
+    for i in range(len(questions) - 1, -1, -1):
+        width = questions[i].x1 - questions[i].x0
+        width_threshold = 100
+        if (width < width_threshold):
+            questions.pop(i)
+
+    return questions
 
 
 # main function
 if __name__ == "__main__":
 
     exam_folder = './exam_papers'
-    exams_dir = glob.glob(f'{exam_folder}/*.pdf')
-    for exam_dir in exams_dir:
-        exam_name = os.path.splitext(os.path.basename(exam_dir))[0]
-        capture_screenshots(exam_dir, exam_name)
+
+    # exams_dir = glob.glob(f'{exam_folder}/*.pdf')
+    # for exam_dir in exams_dir:
+    #     exam_name = os.path.splitext(os.path.basename(exam_dir))[0]
+    #     capture_screenshots(exam_dir, exam_name)
 
     exam_names = [
         "Carlingford Preliminary Physics (2019) Yearly Examination",
         "2018 Project Academy",
         "2019_TEC"]
+    exam_name = "2019_TEC"
     pdf_file = f"{exam_folder}/{exam_name}.pdf"
-    # capture_screenshots(pdf_file, exam_name)
+    capture_screenshots(pdf_file, exam_name)
 
     # for exam in exam_names:
     #     # print(pdf_file)
     #     capture_screenshots(pdf_file, exam)
-        # print(f'Screenshots captured for {exam}')
+    # print(f'Screenshots captured for {exam}')
 
 # TODO: MULTIPLE CHOICE SECTION DETECTION - RECOGNISE NUMBERS ON LEFT HAND SIDE? RECOGNISE BOLD FONTS?
