@@ -67,7 +67,6 @@ def find_written_questions(doc, questions_mapped):
         matches = re.finditer(pattern, page_text, re.IGNORECASE)
         for match in matches:
             question = match.group(0)
-            # print(question)
             # Setting pattern to look for specific to question number
             question_number_pattern = r'\b' + \
                 re.escape(question) + r'\b(?![\w-]*-)'
@@ -130,7 +129,7 @@ def find_question_cont(questions, doc):
             if question.question_number == qn:
                 index = questions.index(question)
                 questions.insert(index, question_to_append)
-                breaks = breaks + 1
+                breaks += 1
                 break
 
     if (breaks == 0):

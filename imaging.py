@@ -12,19 +12,30 @@ def capture_screenshots(pdf_file, exam_name):
     # print(pdf_file)
 
     questions_mapped = find_all_questions(doc)
+    # print('Finsiehd finding q')
     # for question in questions_mapped:
     #     print(question.question_number)
     # perhaps we need to first SORT questions into order, in case the algorithm has detected a question before another
     # search for sorting algoritms in python
     set_lower_bounds(questions_mapped)
+    # print('Finsiehd setting lower bounds')
 
     # loop through all questions in question array and capture screenshots
     for question in questions_mapped:
+        print(question.question_number)
+        # print(question.x0)
+        # print(question.y0)
         if question.x0 == 0 and question.y0 == 0:
             continue
         page_number = question.page_number
+        # print('accessed1')
         page = doc[page_number]
+        # print('accessed2')
+
+        # PROGRAM IS CONSTANTLY STUCK ON THIS LINE
         pix = page.get_pixmap()
+
+        # print('accessed3')
 
         # capture screenshot in a pix array
         screenshot = np.frombuffer(
@@ -52,7 +63,7 @@ def capture_screenshots(pdf_file, exam_name):
 def int_question_number(question_num_str):
     if isinstance(question_num_str, int):
         return question_num_str
-    elif 'Question' in question_num_str or 'question' in question_num_str:
+    elif 'Question' in question_num_str or 'question' in question_num_str or 'QUESTION':
         parts = question_num_str.split()
         return int(parts[-1])
 
@@ -77,14 +88,8 @@ def crop_image(page, question, image):
 
     x1, y1 = int(question.x0) - 5, int(question.y0)  # Top-left corner
     x2, y2 = int(question.x1), int(question.y1)  # Bottom-right corner
-    
+
     cropped_image = image[y1:y2, x1:x2]
-    # if question.question_number == 20:
-    #     print(x1)
-    #     print(y1)
-    #     print(x2)
-    #     print(y2)
-    #     print(question.page_number)
     return cropped_image
 
 
@@ -102,18 +107,22 @@ def clean_questions(questions):
 # main function
 if __name__ == "__main__":
 
-    exam_folder = './exam_papers'
+    # exam_folder = 'exam_papers'
+    # exam_folder = 'Chemistry_HSC_1995_2000'
+    exam_folder = 'chemistry_hsc_2001_2018'
 
-    # exams_dir = glob.glob(f'{exam_folder}/*.pdf')
+    # exams_dir = glob.glob(f'./{exam_folder}/*.pdf')
     # for exam_dir in exams_dir:
     #     exam_name = os.path.splitext(os.path.basename(exam_dir))[0]
+    #     print('Starting to image', exam_name)
     #     capture_screenshots(exam_dir, exam_name)
+    #     print(f'Screenshots captured for {exam_name}')
 
-    exam_names = [
-        "Carlingford Preliminary Physics (2019) Yearly Examination",
-        "2018 Project Academy",
-        "2019_TEC"]
-    exam_name = "2019_TEC"
+    # exam_names = [
+    #     "Carlingford Preliminary Physics (2019) Yearly Examination",
+    #     "2018 Project Academy",
+    #     "2019_TEC"]
+    exam_name = "chemistry-hsc-exam-2013"
     pdf_file = f"{exam_folder}/{exam_name}.pdf"
     capture_screenshots(pdf_file, exam_name)
 
