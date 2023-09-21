@@ -4,6 +4,8 @@ import numpy as np
 import re
 import os
 import glob
+from question_class import QuestionClass
+from mc_detection import find_mc_questions
 
 
 class QuestionClass:
@@ -17,7 +19,7 @@ class QuestionClass:
 
 
 # navigating through the dictionary structure of page to obtain x0, y0 of text
-def getHeight(pattern, page):
+def get_x0y0(pattern, page):
     breaks = False
     data = page.get_text("dict")
     for block in data['blocks']:
@@ -46,16 +48,7 @@ def question_exists(question_arr, new_question):
     return False
 
 
-def find_mc_questions(doc, questions_mapped):
-    # set regex pattern to detect multiple choice questions
-    # can set a binary pattern? detect 1, 2, 3 within x margin
-    # OR detect Question 1, Question 2... within x + c margin
-    # set margin from sample spaces
-    return questions_mapped
-
-
 def find_written_questions(doc, questions_mapped):
-
     '''Regular expression to match "Question" followed by one or more spaces and one or more digits
     Pattern below excludes:
     'continue' following a question, this indicates a mere sentence saying question continues...
@@ -74,11 +67,11 @@ def find_written_questions(doc, questions_mapped):
         matches = re.finditer(pattern, page_text, re.IGNORECASE)
         for match in matches:
             question = match.group(0)
-            print(question)
+            # print(question)
             # Setting pattern to look for specific to question number
             question_number_pattern = r'\b' + \
                 re.escape(question) + r'\b(?![\w-]*-)'
-            x0y0 = getHeight(question_number_pattern, doc[page_number])
+            x0y0 = get_x0y0(question_number_pattern, doc[page_number])
             # set threshold of x where after x, any "question" detected is seen as invalid
             x_threshold = 200
             # if detected pattern is to the right of accepted margin OR not in the question_number_pattern
@@ -98,7 +91,7 @@ def find_written_questions(doc, questions_mapped):
 # Finds all questions on the pdf doc returns array containing all questions
 def find_all_questions(doc):
     questions_mapped = []
-    # questions_mapped = find_mc_questions(doc, questions_mapped)
+    questions_mapped = find_mc_questions(doc, questions_mapped)
     questions_mapped = find_written_questions(doc, questions_mapped)
 
     return questions_mapped
@@ -121,7 +114,7 @@ def find_question_cont(questions, doc):
         next = questions[i + 1]
         # print(next.question_number)
         if (next.page_number - curr.page_number <= 4 and next.page_number - curr.page_number > 1):
-            print(curr.question_number + ': continuation detected')
+            print(curr.question_number, ': continuation detected')
             page = doc[curr.page_number]
             default_width = page.rect.width
             default_height = page.rect.height

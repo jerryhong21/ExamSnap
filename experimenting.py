@@ -2,11 +2,12 @@ import fitz  # PyMuPDF
 import json
 import re
 import glob
+from mc_detection import get_left_text
 
 files = glob.glob("./exam_papers/*.pdf")
 for file in files:
     print(file)
-    
+
 
 
 def add_circle(page, x, y, radius):
@@ -15,12 +16,16 @@ def add_circle(page, x, y, radius):
 
 
 # Open a PDF document
-pdf = '2018_Final_Exam.pdf'
+pdf = '2021-hsc-biology.pdf'
 pdf_document = fitz.open(pdf)
 
 # Select a page (e.g., page 0)
-page_number = 11
+page_number = 10
 page = pdf_document[page_number]
+left_text = get_left_text(page)
+filtered_left_text = [
+    element for element in left_text if re.search(r'\d', element)]
+print(filtered_left_text)
 
 x, y = 57.10624313354492, 70.39580535888672
 radius = 5
@@ -28,7 +33,7 @@ radius = 5
 
 # Get the text elements on the page as dictionaries
 # data = json.loads(page.get_text("json"))
-data = page.get_text("dict")
+data = page.get_text()
 # print(data)
 
 
@@ -69,4 +74,6 @@ def getHeight(pattern, page):
     return bbox[1]
 
 
-getHeight('Question 24', page)
+# getHeight('Question 24', page)
+
+

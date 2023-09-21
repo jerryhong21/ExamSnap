@@ -12,7 +12,8 @@ def capture_screenshots(pdf_file, exam_name):
     # print(pdf_file)
 
     questions_mapped = find_all_questions(doc)
-    # print(questions_mapped)
+    # for question in questions_mapped:
+    #     print(question.question_number)
     # perhaps we need to first SORT questions into order, in case the algorithm has detected a question before another
     # search for sorting algoritms in python
     set_lower_bounds(questions_mapped)
@@ -47,7 +48,9 @@ def capture_screenshots(pdf_file, exam_name):
 
 # extracts question number integer (e.g. int_question_number('Question 24') = 24)
 def int_question_number(question_num_str):
-    if 'Question' in question_num_str or 'question' in question_num_str:
+    if isinstance(question_num_str, int):
+        return question_num_str
+    elif 'Question' in question_num_str or 'question' in question_num_str:
         parts = question_num_str.split()
         return int(parts[-1])
 
@@ -86,12 +89,12 @@ if __name__ == "__main__":
         exam_name = os.path.splitext(os.path.basename(exam_dir))[0]
         capture_screenshots(exam_dir, exam_name)
 
-    # exam_name = "2018 Project Academy"
-    # exam_names = [
-    #     "Carlingford Preliminary Physics (2019) Yearly Examination",
-    #     "2018 Project Academy",
-    #     "2019_TEC"]
-    # pdf_file = f"{exam_folder}/{exam_name}.pdf"
+    exam_names = [
+        "Carlingford Preliminary Physics (2019) Yearly Examination",
+        "2018 Project Academy",
+        "2019_TEC"]
+    pdf_file = f"{exam_folder}/{exam_name}.pdf"
+    # capture_screenshots(pdf_file, exam_name)
 
     # for exam in exam_names:
     #     # print(pdf_file)
