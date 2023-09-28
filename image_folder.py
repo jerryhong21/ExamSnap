@@ -1,6 +1,8 @@
 from capture_screenshots import capture_screenshots
 import os
 import glob
+# from wand.image import Image
+
 
 
 exam_folder = input("Enter the name of folder you'd like to input: ")

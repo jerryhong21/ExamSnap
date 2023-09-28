@@ -4,9 +4,45 @@ import numpy as np
 import re
 import os
 import glob
-from question_detection import find_all_questions
+# import cairosvg
+# from question_detection import find_all_questions
+# from wand.image import Image
 
 
+# def capture_screenshots(pdf_file, exam_name):
+#     doc = fitz.open(pdf_file)
+
+#     questions_mapped = find_all_questions(doc)
+#     set_lower_bounds(questions_mapped)
+
+#     for question in questions_mapped:
+#         print("Mapping", question.question_number)
+
+#         if question.x0 == 0 and question.y0 == 0:
+#             continue
+
+#         page_number = question.page_number
+#         page_path = f'{pdf_file}[{page_number}]'
+
+#         # Convert PDF page to image using wand
+#         with Image(filename=page_path) as img:
+#             # Specify the output file path for the image
+#             folder_name = 'exam_images'
+#             exam_dir = f"./{folder_name}/{exam_name}"
+#             if not os.path.exists(exam_dir):
+#                 os.makedirs(exam_dir)
+
+#             png_file = f"{exam_dir}/Q{int_question_number(question.question_number)}_P{question.page_number}.png"
+
+#             # Save the image
+#             img.save(filename=png_file)
+
+#             # Crop the image
+#             image = cv2.imread(png_file)
+#             cropped_image = crop_image(page, question, image)
+#             cv2.imwrite(png_file, cropped_image)
+
+# old functon
 def capture_screenshots(pdf_file, exam_name):
     doc = fitz.open(pdf_file)
     # print(pdf_file)
@@ -32,10 +68,9 @@ def capture_screenshots(pdf_file, exam_name):
         page = doc[page_number]
         # print('accessed2')
 
+
         # PROGRAM IS CONSTANTLY STUCK ON THIS LINE
         pix = page.get_pixmap()
-
-        # print('accessed3')
 
         # capture screenshot in a pix array
         screenshot = np.frombuffer(
