@@ -26,7 +26,7 @@ This mode is designed for screenshotting individual exam papers.
     python3 image_paper.py
     ```
 - Follow the prompts and enter the exact file name of your exam paper (including the file extension, e.g., `.pdf`).
-- Screenshots will be saved in the `output images` folder.
+- Screenshots will be saved in the `output_images` folder.
 
 #### Mode 2: Bulk Exam Papers
 
@@ -38,7 +38,7 @@ For processing multiple exam papers in bulk:
     python3 image_folder.py
     ```
 - Follow the prompts and enter the exact name of your exam folder.
-- Screenshots will be captured and saved in the `output images` folder.
+- Screenshots will be captured and saved in the `output_images` folder.
 
 ### Note
 
