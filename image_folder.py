@@ -4,7 +4,7 @@ import glob
 
 
 exam_folder = input("Enter the name of folder you'd like to input: ")
-exams_dir = glob.glob(f'./{exam_folder}/*.pdf')
+exams_dir = glob.glob(f'exam_folders/{exam_folder}/*.pdf')
 for exam_dir in exams_dir:
     exam_name = os.path.splitext(os.path.basename(exam_dir))[0]
     print('Starting to image', exam_name)

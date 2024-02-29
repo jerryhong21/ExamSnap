@@ -23,14 +23,10 @@ def capture_screenshots(pdf_file, exam_name):
     # loop through all questions in question array and capture screenshots
     for question in questions_mapped:
         print("Mapping", question.question_number)
-        # print(question.x0)
-        # print(question.y0)
         if question.x0 == 0 and question.y0 == 0:
             continue
         page_number = question.page_number
-        # print('accessed1')
         page = doc[page_number]
-        # print('accessed2')
 
         # PROGRAM IS CONSTANTLY STUCK ON THIS LINE
         pix = page.get_pixmap()
@@ -41,11 +37,11 @@ def capture_screenshots(pdf_file, exam_name):
         screenshot = np.frombuffer(
             pix.samples, dtype=np.uint8).reshape(pix.h, pix.w, pix.n)
         # PNG file that goes to a folder named after exam
-        folder_name = 'exam_images'
+        folder_name = 'output_images'
         exam_dir = f"./{folder_name}/{exam_name}"
         if not os.path.exists(exam_dir):
             os.makedirs(exam_dir)
-        png_file = f"./{folder_name}/{exam_name}/Q{int_question_number(question.question_number)}_P{question.page_number}.png"
+        png_file = f"./{folder_name}/{exam_name}/{exam_name}_Q{int_question_number(question.question_number)}_P{question.page_number}.png"
         # print(png_file)
         # png_file = f"{exam_name}_{question.question_number}_Page{question.page_number}.png"
 
@@ -100,35 +96,7 @@ def clean_questions(questions):
         width_threshold = 100
         if (width < width_threshold):
             questions.pop(i)
-
+            
     return questions
-
-
-# main function
-# if __name__ == "__main__":
-
-    # exam_folder = 'exam_papers'
-    # exam_folder = 'Chemistry_HSC_1995_2000'
-    # exam_folder = 'physics hsc papers'
-
-    # exams_dir = glob.glob(f'./{exam_folder}/*.pdf')
-    # for exam_dir in exams_dir:
-    #     exam_name = os.path.splitext(os.path.basename(exam_dir))[0]
-    #     print('Starting to image', exam_name)
-    #     capture_screenshots(exam_dir, exam_name)
-    #     print(f'Screenshots captured for {exam_name}')
-
-    # exam_names = [
-    #     "Carlingford Preliminary Physics (2019) Yearly Examination",
-    #     "2018 Project Academy",
-    #     "2019_TEC"]
-    # exam_name = "chemistry-hsc-exam-2013"
-    # pdf_file = f"{exam_folder}/{exam_name}.pdf"
-    # capture_screenshots(pdf_file, exam_name)
-
-    # for exam in exam_names:
-    #     # print(pdf_file)
-    #     capture_screenshots(pdf_file, exam)
-    # print(f'Screenshots captured for {exam}')
 
 # TODO: MULTIPLE CHOICE SECTION DETECTION - RECOGNISE NUMBERS ON LEFT HAND SIDE? RECOGNISE BOLD FONTS?

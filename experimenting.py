@@ -9,7 +9,6 @@ for file in files:
     print(file)
 
 
-
 def add_circle(page, x, y, radius):
     circle_annot = page.add_circle_annot([x, y], radius)
     circle_annot.set_colors(fill=(1, 0, 0))  # Set the fill color to red
@@ -75,5 +74,3 @@ def getHeight(pattern, page):
 
 
 # getHeight('Question 24', page)
-
-
