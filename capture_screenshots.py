@@ -61,7 +61,9 @@ def int_question_number(question_num_str):
         return question_num_str
     elif 'Question' in question_num_str or 'question' in question_num_str or 'QUESTION':
         parts = question_num_str.split()
-        return int(parts[-1])
+        clean_question_num_str = extract_first_number(parts[-1])
+        if clean_question_num_str != None:
+            return int(clean_question_num_str)
 
     # if 0 is returned then error as occured
     print(f"An error occured while converting '{question_num_str}' to integer")
@@ -87,6 +89,15 @@ def crop_image(page, question, image):
 
     cropped_image = image[y1:y2, x1:x2]
     return cropped_image
+
+
+def extract_first_number(s):
+
+    # Find all instances of one or more digits in the string
+    numbers = re.findall(r'\d+', s)
+
+    # If there's at least one match, return the first. Otherwise, return None.
+    return numbers[0] if numbers else None
 
 
 def clean_questions(questions):
